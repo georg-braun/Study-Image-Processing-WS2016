@@ -44,6 +44,7 @@ pointTracker = vision.PointTracker('MaxBidirectionalError', 2);
 inlierScenePoints = 0 ;
 runPtTracker = false ;
 usePtTracker = true ;
+needSURFCounter = 10 ; % Counter bis wann wieder Surf notwendig ist.
 
 for camLoop = 1 : 200
   % --------------- CAM-BILD AUFNEHMEN -------------------    
@@ -57,9 +58,13 @@ for camLoop = 1 : 200
 
    %--- Analyse ob PT oder SURF
     runPtTracker = false ;
-    if ( length(inlierScenePoints) ~= 1 )
-       runPtTracker = true && usePtTracker ;
-    end 
+    if ( length(inlierScenePoints) ~= 1 ) && ( needSURFCounter ~= 0 )
+        runPtTracker = true && usePtTracker ;
+    else
+        needSURFCounter = 5 ;
+    end
+    
+    needSURFCounter
     
    %--------------- POINT-TRACKER ------------------------
     
@@ -67,6 +72,7 @@ for camLoop = 1 : 200
        pointTracker = vision.PointTracker('MaxBidirectionalError', 2);        
        initialize(pointTracker, inlierScenePoints.Location, sceneImageRGB);
        
+       prevCamFrame    = sceneImageRGB ; %Test
        sceneImageRGB     = snapshot(cam);       
        
        [trackedPoints, isValid] = step(pointTracker, sceneImageRGB);
@@ -79,6 +85,11 @@ for camLoop = 1 : 200
             estimateGeometricTransform(oldValidLocations, newValidLocations, 'Similarity');
             % Den Code könnte man später rausziehen und mit SURF
             % "verbinden"
+            
+            %figure(2);
+           % showMatchedFeatures(prevCamFrame, sceneImageRGB, ...
+            %        oldInlierLocations, newInlierLocations, 'Montage');
+
             setPoints(pointTracker, newValidLocations);
             trackingTransform.T = tform.T * trackingTransform.T;
             
@@ -90,9 +101,10 @@ for camLoop = 1 : 200
             imageAlexTransformed(:,:,3) > 0 ;
    
             outputFrame = step(alphaBlender, sceneImageRGB, imageAlexTransformed, mask);
-            runPtTracker
+            %runPtTracker
             figure(1);
             imshow(outputFrame);        
+            
         else
             runPtTracker = false ;
             inlierScenePoints = 0 ;
@@ -147,11 +159,13 @@ for camLoop = 1 : 200
 
             outputFrame = step(alphaBlender, sceneImageRGB, imageAlexTransformed, mask);
         end  % if ( length(BoxPairs) > 40 ) 
-        runPtTracker
+        %runPtTracker
         figure(1);
         imshow(outputFrame);
     end 
 
+    needSURFCounter = needSURFCounter -1 ;
+    
 end  % for..    
     
 
