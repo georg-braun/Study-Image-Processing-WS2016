@@ -25,9 +25,18 @@ sceneImageRGB     = snapshot(cam);
 %sceneImageRGB = imread('images/pulpmitalbert.jpg');
 sceneImage = rgb2gray(sceneImageRGB);
 
+% Video initialisieren
+video = vision.VideoFileReader('../trailer/pulpfiction.mp4', ...
+                                'VideoOutputDataType', 'uint8');
+                          
+for k=1:80
+   step(video);
+end
+
 % Ersatzbild
 % Bild auf die Größe Transformieren
-imageAlex = imread('../images/pulpmitalex.jpg');
+%imageAlex = imread('../images/pulpmitalex.jpg');
+imageAlex = step(video);
 repDims = size(imageAlex(:,:,1));  % Auflösung des Videos
 refDims = size(boxImage);  % Auflösung des Referenzbildes
 % Transformationsmatrix ermitteln
@@ -46,6 +55,9 @@ runPtTracker = false ;
 usePtTracker = true ;
 needSURFCounter = 10 ; % Counter bis wann wieder Surf notwendig ist.
 
+
+
+
 for camLoop = 1 : 200
   % --------------- CAM-BILD AUFNEHMEN -------------------    
     % Webcam Bild aufnehmen
@@ -56,12 +68,18 @@ for camLoop = 1 : 200
   %  imshow(sceneImage);
   %  figure(1);
 
+  
+  % ---------- TRANSFORM VIDEO
+    imageAlex = step(video);
+    scaleTransform = affine2d([xScale 0 0; 0 yScale 0; 0 0 1]);
+    imageAlexScaled = imwarp(imageAlex, scaleTransform);
+  
    %--- Analyse ob PT oder SURF
     runPtTracker = false ;
     if ( length(inlierScenePoints) ~= 1 ) && ( needSURFCounter ~= 0 )
         runPtTracker = true && usePtTracker ;
     else
-        needSURFCounter = 5 ;
+        needSURFCounter = 3 ;
     end
     
     needSURFCounter
