@@ -52,7 +52,7 @@ pointTracker = vision.PointTracker('MaxBidirectionalError', 2);
 
 inlierScenePoints = 0 ;
 runPtTracker = false ;
-usePtTracker = true ;
+usePtTracker = false ;
 needSURFCounter = 10 ; % Counter bis wann wieder Surf notwendig ist.
 
 
