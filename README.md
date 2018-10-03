@@ -7,6 +7,8 @@ Read a webcam image and try to detect the movie cover and play the trailer at th
 
 ## Example
 
+![Alt text](Demo.gif)
+
 ### Transformed Image
 
 ![Alt text](BvAr.png?raw=true)
